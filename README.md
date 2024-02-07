@@ -1,5 +1,5 @@
 # Projet Keylogger PEI
 
-## Build
+## Exécution du code
 
-run the command `caro build` to build the project, then run `./target/debug/projet-pei`
+- Exécutez la commande `cargo run` pour exécuter le programme.
