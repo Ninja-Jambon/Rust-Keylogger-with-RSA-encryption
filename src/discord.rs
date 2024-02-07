@@ -23,5 +23,3 @@ impl Discord {
         let _res = client.post(format!("https://discord.com/api/webhooks/{}/{}", self.channel_id, self.token)).json(&map).send();
     }
 }
-
-ododood
