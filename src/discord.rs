@@ -2,13 +2,15 @@ use reqwest::blocking::Client;
 use std::collections::HashMap;
 
 pub struct Discord {
-    url: String
+    channel_id: String,
+    token: String,
 }
 
 impl Discord {
-    pub fn new(url: &str) -> Discord {
+    pub fn new(channel_id: &str, token: &str) -> Discord {
         Discord {
-            url: url.to_string(),
+            channel_id: channel_id.to_string(),
+            token: token.to_string(),
         }
     }
 
@@ -18,6 +20,6 @@ impl Discord {
 
         map.insert("content", content);
 
-        let _res = client.post(&self.url).json(&map).send();
+        let _res = client.post(format!("https://discord.com/api/webhooks/{}/{}", self.channel_id, self.token)).json(&map).send();
     }
 }
