@@ -1,17 +1,38 @@
-use std::fs::OpenOptions;
-use std::io::{Cursor, Read};
+use std::fs::File;
+use std::io::{self, Read};
+use std::mem;
 
-fn main() {
-    let mut file_options = OpenOptions::new();
-    file_options.read(true);
-    file_options.write(false);
+// Structure pour représenter un événement d'entrée
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+struct Timeval {
+    tv_sec: libc::c_long,    // seconds
+    tv_usec: libc::c_long,   // microseconds
+}
 
-    let mut dev_file = file_options.open("/dev/input/event2").unwrap();
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+struct InputEvent {
+    time: Timeval,
+    type_: libc::c_ushort,
+    code: libc::c_ushort,
+    value: libc::c_uint,
+}
 
+fn main() -> io::Result<()> {
+    // Ouvre le périphérique d'entrée
+    let mut file = File::open("/dev/input/event2").expect("eeror opening file");
+
+    // Boucle pour lire en continu les événements du périphérique
     loop {
-        let mut packet = [0u8; 24];
-        dev_file.read_exact(&mut packet).unwrap();
+        // Lit les données d'un événement
+        let mut event_data = [0u8; mem::size_of::<InputEvent>()];
+        file.read_exact(&mut event_data).expect("error reading file");
 
-        println!("{:?}", packet);
+        // Convertit les données en structure InputEvent
+        let event: InputEvent = unsafe { *(event_data.as_ptr() as *const InputEvent) };
+
+        // Affiche l'événement
+        println!("{:?}", event);
     }
 }
