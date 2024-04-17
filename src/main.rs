@@ -27,6 +27,6 @@ fn main() -> io::Result<()> {
 
         let event: InputEvent = unsafe { *(event_data.as_ptr() as *const InputEvent) };
 
-        println!("{:?}", event);
+        println!("{:?}", event.code);
     }
 }
