@@ -1,72 +1,116 @@
-use rand;
 use rand::Rng;
-use num::{BigInt, One, Pow, ToPrimitive, Zero};
-use num_bigint::BigUint;
-use num_traits::{One, Zero};
-use primal::Primes;
+use num_integer::gcd;
 
-const EXPONENT: i64 = 65537;
-
-fn puissance_modulaire(base: &BigUint, exposant: &BigUint, n: &BigUint) -> BigUint {
-	base.modpow(&exposant, &n)
-}
-
-fn generer_cle(bits: u32) -> (BigUint, BigUint, BigUint) {
-	let un = BigUint::one();
-	let deux = BigUint::from(2u32);
-
-	let p = generer_premier(bits);
-	let q = generer_premier(bits);
-
-	let n = &p * &q;
-	let totient = (&p - &un) * (&q - &un);
-
-	let mut exposant_public = deux;
-	while (&exposant_public * &totient - &un).is_zero() || ((&exposant_public * &totient - &un).to_i64().unwrap() % EXPONENT == 0) {
-		exposant_public += un;
+fn is_prime(n: u64) -> bool {
+	if n < 2 {
+		return false;
 	}
 
-	let mut cle_privee = exposant_public.inverse(&totient).unwrap();
+	let mut i = 2;
 
-	(n, cle_privee, exposant_public)
-}
-
-fn generer_premier(bits: u32) -> BigUint {
-	let mut generateur_aleatoire = rand::thread_rng();
-	let mut candidat_premier: BigUint;
-
-	loop {
-		candidat_premier = generateur_aleatoire.gen_biguint(bits as usize);
-		if Primes::all().any(|p| candidat_premier == p) {
-			break;
+	while i < (n as f64).sqrt() as u64 + 1 {
+		if n % i == 0 {
+			return false;
 		}
+		i+=1;
 	}
 
-	candidat_premier
+	return true;
 }
 
+fn gen_prime(a: u64, b: u64) -> u64 {
+	let mut rng = rand::thread_rng();
+	let mut n = rng.gen_range(a..b);
 
-fn chiffrer_public(message: &[u8], exposant_public: &BigUint, n: &BigUint) -> Vec<u8> {
-	message.iter()
-		.map(|octet| puissance_modulaire(&BigUint::from_u32(*octet as u32).unwrap(), exposant_public, n))
-		.map(|ciphertext| ciphertext.to_u32().unwrap() as u8)
-		.collect()
+	while !is_prime(n) {
+		n = rng.gen_range(a..b);
+	}
+
+	return n;
 }
 
-fn dechiffrer_prive(ciphertext: &[u8], cle_privee: &BigUint, n: &BigUint) -> Vec<u8> {
-	ciphertext.iter()
-		.map(|octet| puissance_modulaire(&BigUint::from_u32(*octet as u32).unwrap(), cle_privee, n))
-		.map(|plaintext| plaintext.to_u32().unwrap() as u8)
-		.collect()
+fn mod_inverse(e: u64, phi: u64) -> u64 {
+	let mut d: u64 = 3;
+
+	while d < phi {
+		if (d * e) % phi == 1 {
+			return d
+		}
+		d+=1;
+	}
+
+	panic!("Error");
 }
 
+pub fn gen_keys(a: u64, b: u64) -> (u64, u64, u64) {
+	let p = gen_prime(a, b);
+	let mut q = gen_prime(a, b);
+
+	while p == q {
+		q = gen_prime(a, b);
+	}
+
+	let n = p * q;
+	let phi_n = (p - 1) * (q - 1);
+
+	let mut rng = rand::thread_rng();
+	let mut e = rng.gen_range(3..(phi_n-1));
+
+	while gcd(e, phi_n) != 1 {
+		e = rng.gen_range(3..phi_n-1);
+	}
+
+	let d = mod_inverse(e, phi_n);
+
+	(e, d, n)
+}
+
+fn mod_pow(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
+	if modulus == 1 { return 0 }
+	let mut result = 1;
+	base = base % modulus;
+	while exp > 0 {
+		if exp % 2 == 1 {
+			result = result * base % modulus;
+		}
+		exp = exp >> 1;
+		base = base * base % modulus
+	}
+	return result
+}
+
+pub fn array_mod_pow(bytes: &[u64], d: u64, n: u64) -> Vec<u64> {
+    let mut new_bytes = vec![0u64; bytes.len()];
+
+    let mut i = 0;
+
+    while i < bytes.len() {
+    	new_bytes[i] = mod_pow(bytes[i] as u64, d, n);
+    	i+=1;
+    }
+
+    return new_bytes;
+}
+
+/*
 fn main() {
-	let (n, cle_privee, exposant_public) = generer_cle(1024);
-	let message = b"Hello, world!";
+	let (e, d, n) = gen_keys(10000, 50000);
 
-	let ciphertext = chiffrer_public(message, &exposant_public, &n);
-	let plaintext = dechiffrer_prive(&ciphertext, &cle_privee, &n);
+	println!("e : {}", e);
+	println!("d : {}", d);
+	println!("n : {}", n);
 
-	println!("Message original : {:?}", message);
-	println!("Message déchiffré : {:?}", plaintext);
+	let message = "Hello, world!";
+    let message_as_64: Vec<u64> = message
+        .as_bytes()
+        .iter()
+        .map(|&x| x as u64)
+        .collect();
+
+    println!("{:?}", message_as_64);
+    println!(
+        "{:?}",
+        array_mod_pow(&array_mod_pow(&message_as_64, e, n), d, n)
+    );
 }
+*/
