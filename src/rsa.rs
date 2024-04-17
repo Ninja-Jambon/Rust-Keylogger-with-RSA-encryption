@@ -80,16 +80,16 @@ fn mod_pow(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
 }
 
 pub fn array_mod_pow(bytes: &[u64], d: u64, n: u64) -> Vec<u64> {
-    let mut new_bytes = vec![0u64; bytes.len()];
+	let mut new_bytes = vec![0u64; bytes.len()];
 
-    let mut i = 0;
+	let mut i = 0;
 
-    while i < bytes.len() {
-    	new_bytes[i] = mod_pow(bytes[i] as u64, d, n);
-    	i+=1;
-    }
+	while i < bytes.len() {
+		new_bytes[i] = mod_pow(bytes[i] as u64, d, n);
+		i+=1;
+	}
 
-    return new_bytes;
+	return new_bytes;
 }
 
 /*
@@ -101,16 +101,16 @@ fn main() {
 	println!("n : {}", n);
 
 	let message = "Hello, world!";
-    let message_as_64: Vec<u64> = message
-        .as_bytes()
-        .iter()
-        .map(|&x| x as u64)
-        .collect();
+	let message_as_64: Vec<u64> = message
+		.as_bytes()
+		.iter()
+		.map(|&x| x as u64)
+		.collect();
 
-    println!("{:?}", message_as_64);
-    println!(
-        "{:?}",
-        array_mod_pow(&array_mod_pow(&message_as_64, e, n), d, n)
-    );
+	println!("{:?}", message_as_64);
+	println!(
+		"{:?}",
+		array_mod_pow(&array_mod_pow(&message_as_64, e, n), d, n)
+	);
 }
 */
