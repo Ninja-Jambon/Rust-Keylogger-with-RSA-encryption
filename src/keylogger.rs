@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::Read;
 use std::mem;
 
 #[repr(C)]
@@ -18,22 +18,20 @@ pub struct InputEvent {
 	pub value: libc::c_uint,
 }
 
-pub struct keyLogger {
-	eventFile: File
+pub struct KeyLogger {
+	event_file: File
 }
 
-impl keyLogger {
-	pub fn new(eventFile: &str) -> keyLogger {
-		keyLogger {
-			eventFile: File::open(eventFile).expect("Error while opening the file")
+impl KeyLogger {
+	pub fn new(event_file: &str) -> KeyLogger {
+		KeyLogger {
+			event_file: File::open(event_file).expect("Error while opening the file")
 		}
 	}
 
-	pub fn getCurrentEvent(&mut self) -> [u8; mem::size_of::<InputEvent>()] {
+	pub fn get_current_event(&mut self) -> [u8; mem::size_of::<InputEvent>()] {
 		let mut event_data = [0u8; mem::size_of::<InputEvent>()];
-		self.eventFile.read_exact(&mut event_data).expect("Error while reading event file");
-
-		//let event: InputEvent = unsafe { *(event_data.as_ptr() as *const InputEvent) };
+		self.event_file.read_exact(&mut event_data).expect("Error while reading event file");
 
 		return event_data;
 	}

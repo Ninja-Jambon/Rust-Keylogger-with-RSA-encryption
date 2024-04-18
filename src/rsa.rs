@@ -18,15 +18,16 @@ fn is_prime(n: u64) -> bool {
 	return true;
 }
 
-pub fn convert_to_u64(array: [u8; 24]) -> [u64; 3] {
+pub fn convert_to_u64(array: Vec<u8>) -> Vec<u64> {
 	[
 		u64::from_be_bytes(array[0..8].try_into().unwrap()),
 		u64::from_be_bytes(array[8..16].try_into().unwrap()),
 		u64::from_be_bytes(array[16..24].try_into().unwrap()),
 	]
+	.to_vec()
 }
 
-pub fn convert_to_u8(array: [u64; 3]) -> [u8; 24] {
+pub fn convert_to_u8(array: Vec<u64>) -> Vec<u8> {
 	let mut result = [0u8; 24];
 	
 	for (i, &num) in array.iter().enumerate() {
@@ -34,7 +35,7 @@ pub fn convert_to_u8(array: [u64; 3]) -> [u8; 24] {
 		result[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
 	}
 	
-	result
+	result.to_vec()
 }
 
 fn gen_prime(a: u64, b: u64) -> u64 {
@@ -98,7 +99,7 @@ fn mod_pow(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
 	return result
 }
 
-pub fn array_mod_pow(bytes: &[u64], d: u64, n: u64) -> Vec<u64> {
+pub fn array_mod_pow(bytes: Vec<u64>, d: u64, n: u64) -> Vec<u64> {
 	let mut new_bytes = vec![0u64; bytes.len()];
 
 	let mut i = 0;
@@ -110,26 +111,3 @@ pub fn array_mod_pow(bytes: &[u64], d: u64, n: u64) -> Vec<u64> {
 
 	return new_bytes;
 }
-
-/*
-fn main() {
-	let (e, d, n) = gen_keys(10000, 50000);
-
-	println!("e : {}", e);
-	println!("d : {}", d);
-	println!("n : {}", n);
-
-	let message = "Hello, world!";
-	let message_as_64: Vec<u64> = message
-		.as_bytes()
-		.iter()
-		.map(|&x| x as u64)
-		.collect();
-
-	println!("{:?}", message_as_64);
-	println!(
-		"{:?}",
-		array_mod_pow(&array_mod_pow(&message_as_64, e, n), d, n)
-	);
-}
-*/
