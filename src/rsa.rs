@@ -18,6 +18,25 @@ fn is_prime(n: u64) -> bool {
 	return true;
 }
 
+pub fn convert_to_u64(array: [u8; 24]) -> [u64; 3] {
+	[
+		u64::from_be_bytes(array[0..8].try_into().unwrap()),
+		u64::from_be_bytes(array[8..16].try_into().unwrap()),
+		u64::from_be_bytes(array[16..24].try_into().unwrap()),
+	]
+}
+
+pub fn convert_to_u8(array: [u64; 3]) -> [u8; 24] {
+	let mut result = [0u8; 24];
+	
+	for (i, &num) in array.iter().enumerate() {
+		let bytes = num.to_be_bytes();
+		result[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
+	}
+	
+	result
+}
+
 fn gen_prime(a: u64, b: u64) -> u64 {
 	let mut rng = rand::thread_rng();
 	let mut n = rng.gen_range(a..b);
