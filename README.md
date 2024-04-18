@@ -1,5 +1,3 @@
-# Projet Keylogger PEI
+# Rust Keylogger with RSA encryption
 
-## Exécution du code
-
-- Exécutez la commande `cargo run` pour exécuter le programme.
+This is a Keylogger with RSA encryption built in rust. It is a school project.
