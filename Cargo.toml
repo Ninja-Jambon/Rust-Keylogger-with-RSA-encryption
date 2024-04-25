@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.38"
 libc = "0.2.153"
-num-integer = "0.1.46"
+num-bigint = { version = "0.4.4", features = ["rand"] }
+num-bigint-dig = "0.8.4"
 rand = "0.8.5"
