@@ -33,6 +33,11 @@ impl KeyLogger {
 		let mut event_data = [0u8; mem::size_of::<InputEvent>()];
 		self.event_file.read_exact(&mut event_data).expect("Error while reading event file");
 
+		/*
+        let event: InputEvent = unsafe { *(event_data.as_ptr() as *const InputEvent) };
+        println!("{:?}", event);
+        */
+
 		return event_data;
 	}
 }
